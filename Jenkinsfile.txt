@@ -1,37 +1,59 @@
-pipeline {
-    agent any
+environment {
+    DOCKER_IMAGE = 'savitrinb/serve_smart'
+    EC2_HOST = 'ec2-user@your-ec2-public-ip'  // Replace with your actual IP
+}
 
-    environment {
-        IMAGE_NAME = 'food-ordering-app'
-    }
-
-    stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/your-username/your-repo-name.git'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t $IMAGE_NAME .'
-            }
-        }
-
-        stage('Run Docker Compose') {
-            steps {
-                sh 'docker-compose down || true'
-                sh 'docker-compose up -d'
-            }
+stages {
+    stage('Clone Repository') {
+        steps {
+            git credentialsId: '88f671b4-90a3-4083-bba4-37e02f273e33', url: 'https://github.com/your-username/your-repo.git'
         }
     }
 
-    post {
-        success {
-            echo 'App deployed successfully 🎉'
+    stage('Build Docker Image') {
+        steps {
+            bat "docker build -t %DOCKER_IMAGE% ."
         }
-        failure {
-            echo 'Deployment failed ❌'
+    }
+
+    stage('Push to Docker Hub') {
+        steps {
+            withCredentials([usernamePassword(credentialsId: 'your-dockerhub-creds-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                bat """
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    docker push %DOCKER_IMAGE%:latest
+                """
+            }
         }
+    }
+
+    stage('Deploy to EC2') {
+        steps {
+            sshagent(['ec2_ssh_key']) {
+                sh """
+                    ssh -o StrictHostKeyChecking=no $EC2_HOST << 'ENDSSH'
+                        docker pull $DOCKER_IMAGE:latest
+                        docker stop serve_smart || true
+                        docker rm serve_smart || true
+                        docker run -d -p 80:80 --name serve_smart $DOCKER_IMAGE:latest
+                    ENDSSH
+                """
+            }
+        }
+    }
+
+    stage('Cleanup') {
+        steps {
+            bat "docker rmi %DOCKER_IMAGE%"
+        }
+    }
+}
+
+post {
+    success {
+        echo '✅ CI/CD pipeline complete. App deployed on EC2.'
+    }
+    failure {
+        echo '❌ Pipeline failed.'
     }
 }
