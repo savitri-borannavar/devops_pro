@@ -37,15 +37,15 @@ pipeline {
         }
 
         stage('Deploy to EC2') {
-            steps {
-                sshagent(['ec2_ssh_key']) {
-                    bat """
-                    ssh -o StrictHostKeyChecking=no %EC2_HOST% "docker pull %DOCKER_IMAGE%:latest && ^
-                        docker stop serve_smart || exit 0 && ^
-                        docker rm serve_smart || exit 0 && ^
-                        docker run -d -p 80:80 --name serve_smart %DOCKER_IMAGE%:latest"
-                    """
-                }
+    steps {
+        sshagent(['ec2_ssh_key']) {
+            bat """
+            ssh -o StrictHostKeyChecking=no %EC2_HOST% "docker pull %DOCKER_IMAGE%:latest && \
+                docker stop serve_smart || true && \
+                docker rm serve_smart || true && \
+                docker run -d -p 80:80 --name serve_smart %DOCKER_IMAGE%:latest"
+            """
+        }
             }
         }
 
