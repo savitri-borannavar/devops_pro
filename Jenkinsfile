@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git credentialsId: '88f671b4-90a3-4083-bba4-37e02f273e33', url: 'https://github.com/savitri-borannavar/devops_pro.git'
+               git branch: 'main',  credentialsId: '88f671b4-90a3-4083-bba4-37e02f273e33', url: 'https://github.com/savitri-borannavar/devops_pro.git'
             }
         }
 
