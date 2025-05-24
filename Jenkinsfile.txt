@@ -1,6 +1,6 @@
 environment {
     DOCKER_IMAGE = 'savitrinb/serve_smart'
-    EC2_HOST = 'ec2-user@your-ec2-public-ip'  // Replace with your actual IP
+    EC2_HOST = 'ubuntu@3.83.140.51'  // Replace with your actual IP
 }
 
 stages {
@@ -18,7 +18,7 @@ stages {
 
     stage('Push to Docker Hub') {
         steps {
-            withCredentials([usernamePassword(credentialsId: 'your-dockerhub-creds-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+            withCredentials([usernamePassword(credentialsId: '007643c0-9a20-4874-9b09-2a0926ff1d75', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                 bat """
                     echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                     docker push %DOCKER_IMAGE%:latest
