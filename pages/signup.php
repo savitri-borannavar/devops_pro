@@ -1,5 +1,6 @@
 <?php include('../includes/header.php'); ?>
 <h2>Signup</h2>
+<h2>user can create account here</h2>
 <form method="post">
   <input type="text" name="username" placeholder="Username" required><br><br>
   <input type="password" name="password" placeholder="Password" required><br><br>
