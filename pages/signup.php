@@ -18,4 +18,4 @@ if (isset($_POST['register'])) {
   }
 }
 include('../includes/footer.php');
-?>
+?
